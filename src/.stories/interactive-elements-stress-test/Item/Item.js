@@ -3,14 +3,14 @@ import {sortableElement} from '../../../../src';
 
 import styles from './Item.scss';
 
-function Item(props) {
+const Item = React.forwardRef((props, ref) => {
   const {children} = props;
 
   return (
-    <div className={styles.root} tabIndex={0}>
+    <div className={styles.root} tabIndex={0} ref={ref}>
       {children}
     </div>
   );
-}
+});
 
 export default sortableElement(Item);

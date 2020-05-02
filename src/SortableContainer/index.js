@@ -1,7 +1,5 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
-import {findDOMNode} from 'react-dom';
-import invariant from 'invariant';
 
 import Manager from '../Manager';
 import {isSortableHandle} from '../SortableHandle';
@@ -37,10 +35,7 @@ import {
   defaultKeyCodes,
 } from './props';
 
-export default function sortableContainer(
-  WrappedComponent,
-  config = {withRef: false},
-) {
+export default function sortableContainer(WrappedComponent) {
   return class WithSortableContainer extends React.Component {
     constructor(props) {
       super(props);
@@ -892,25 +887,14 @@ export default function sortableContainer(
       this.animateNodes();
     };
 
-    getWrappedInstance() {
-      invariant(
-        config.withRef,
-        'To access the wrapped instance, you need to pass in {withRef: true} as the second argument of the SortableContainer() call',
-      );
-
-      return this.refs.wrappedInstance;
-    }
-
     getContainer() {
       const {getContainer} = this.props;
 
       if (typeof getContainer !== 'function') {
-        return findDOMNode(this);
+        return this.wrappedInstance;
       }
 
-      return getContainer(
-        config.withRef ? this.getWrappedInstance() : undefined,
-      );
+      return getContainer(this.wrappedInstance);
     }
 
     handleKeyDown = (event) => {
@@ -1046,10 +1030,19 @@ export default function sortableContainer(
       );
     };
 
-    render() {
-      const ref = config.withRef ? 'wrappedInstance' : null;
+    wrappedInstance = null;
 
-      return <WrappedComponent ref={ref} {...omit(this.props, omittedProps)} />;
+    setWrappedInstance = (ref) => {
+      this.wrappedInstance = ref;
+    };
+
+    render() {
+      return (
+        <WrappedComponent
+          ref={this.setWrappedInstance}
+          {...omit(this.props, omittedProps)}
+        />
+      );
     }
 
     get helperContainer() {

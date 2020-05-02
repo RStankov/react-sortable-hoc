@@ -27,91 +27,104 @@ function getItems(count, height) {
   });
 }
 
-const Handle = SortableHandle(({tabIndex}) => (
-  <div className={style.handle} tabIndex={tabIndex}>
-    <svg viewBox="0 0 50 50">
-      <path
-        d="M 0 7.5 L 0 12.5 L 50 12.5 L 50 7.5 L 0 7.5 z M 0 22.5 L 0 27.5 L 50 27.5 L 50 22.5 L 0 22.5 z M 0 37.5 L 0 42.5 L 50 42.5 L 50 37.5 L 0 37.5 z"
-        color="#000"
-      />
-    </svg>
-  </div>
-));
+const Handle = SortableHandle(
+  React.forwardRef(({tabIndex}, ref) => (
+    <div className={style.handle} tabIndex={tabIndex} ref={ref}>
+      <svg viewBox="0 0 50 50">
+        <path
+          d="M 0 7.5 L 0 12.5 L 50 12.5 L 50 7.5 L 0 7.5 z M 0 22.5 L 0 27.5 L 50 27.5 L 50 22.5 L 0 22.5 z M 0 37.5 L 0 42.5 L 50 42.5 L 50 37.5 L 0 37.5 z"
+          color="#000"
+        />
+      </svg>
+    </div>
+  )),
+);
 
 const Item = SortableElement(
-  ({
-    tabbable,
-    className,
-    isDisabled,
-    height,
-    style: propStyle,
-    shouldUseDragHandle,
-    value,
-    itemIndex,
-    isSorting,
-  }) => {
-    const bodyTabIndex = tabbable && !shouldUseDragHandle ? 0 : -1;
-    const handleTabIndex = tabbable && shouldUseDragHandle ? 0 : -1;
+  React.forwardRef(
+    (
+      {
+        tabbable,
+        className,
+        isDisabled,
+        height,
+        style: propStyle,
+        shouldUseDragHandle,
+        value,
+        itemIndex,
+        isSorting,
+      },
+      ref,
+    ) => {
+      const bodyTabIndex = tabbable && !shouldUseDragHandle ? 0 : -1;
+      const handleTabIndex = tabbable && shouldUseDragHandle ? 0 : -1;
 
-    return (
-      <div
-        className={classNames(
-          className,
-          isDisabled && style.disabled,
-          isSorting && style.sorting,
-          shouldUseDragHandle && style.containsDragHandle,
-        )}
-        style={{
-          height,
-          ...propStyle,
-        }}
-        tabIndex={bodyTabIndex}
-        data-index={itemIndex}
-      >
-        {shouldUseDragHandle && <Handle tabIndex={handleTabIndex} />}
-        <div className={style.wrapper}>
-          <span>Item</span> {value}
+      return (
+        <div
+          className={classNames(
+            className,
+            isDisabled && style.disabled,
+            isSorting && style.sorting,
+            shouldUseDragHandle && style.containsDragHandle,
+          )}
+          style={{
+            height,
+            ...propStyle,
+          }}
+          tabIndex={bodyTabIndex}
+          data-index={itemIndex}
+          ref={ref}
+        >
+          {shouldUseDragHandle && <Handle tabIndex={handleTabIndex} />}
+          <div className={style.wrapper}>
+            <span>Item</span> {value}
+          </div>
         </div>
-      </div>
-    );
-  },
+      );
+    },
+  ),
 );
 
 const SortableList = SortableContainer(
-  ({
-    className,
-    items,
-    disabledItems = [],
-    itemClass,
-    isSorting,
-    shouldUseDragHandle,
-    type,
-  }) => {
-    return (
-      <div className={className}>
-        {items.map(({value, height}, index) => {
-          const disabled = disabledItems.includes(value);
+  React.forwardRef(
+    (
+      {
+        className,
+        items,
+        disabledItems = [],
+        itemClass,
+        isSorting,
+        shouldUseDragHandle,
+        type,
+      },
+      ref,
+    ) => {
+      return (
+        <div className={className} ref={ref}>
+          {items.map(({value, height}, index) => {
+            const disabled = disabledItems.includes(value);
 
-          return (
-            <Item
-              tabbable
-              key={`item-${value}`}
-              disabled={disabled}
-              isDisabled={disabled}
-              className={itemClass}
-              index={index}
-              itemIndex={index}
-              value={value}
-              height={height}
-              shouldUseDragHandle={shouldUseDragHandle}
-              type={type}
-              isSorting={isSorting}
-            />
-          );
-        })}
-      </div>
-    );
-  },
+            return (
+              <Item
+                tabbable
+                key={`item-${value}`}
+                disabled={disabled}
+                isDisabled={disabled}
+                className={itemClass}
+                index={index}
+                itemIndex={index}
+                value={value}
+                height={height}
+                shouldUseDragHandle={shouldUseDragHandle}
+                type={type}
+                isSorting={isSorting}
+              />
+            );
+          })}
+        </div>
+      );
+    },
+  ),
 );
 
 class SortableListWithCustomContainer extends React.Component {
@@ -134,25 +147,27 @@ class SortableListWithCustomContainer extends React.Component {
   };
 }
 
-const Category = SortableElement((props) => {
-  const tabIndex = props.tabbable ? 0 : -1;
+const Category = SortableElement(
+  React.forwardRef((props, ref) => {
+    const tabIndex = props.tabbable ? 0 : -1;
 
-  return (
-    <div className={style.category}>
-      <div className={style.categoryHeader}>
-        <Handle tabIndex={tabIndex} />
-        <span>Category {props.value}</span>
+    return (
+      <div className={style.category} ref={ref}>
+        <div className={style.categoryHeader}>
+          <Handle tabIndex={tabIndex} />
+          <span>Category {props.value}</span>
+        </div>
+        <ListWrapper
+          component={SortableList}
+          className={style.categoryList}
+          items={getItems(3, 59)}
+          shouldUseDragHandle={true}
+          helperClass={style.stylizedHelper}
+        />
       </div>
-      <ListWrapper
-        component={SortableList}
-        className={style.categoryList}
-        items={getItems(3, 59)}
-        shouldUseDragHandle={true}
-        helperClass={style.stylizedHelper}
-      />
-    </div>
-  );
-});
+    );
+  }),
+);
 
 class ListWrapper extends Component {
   state = {
@@ -267,33 +282,38 @@ const SortableReactWindow = (Component) =>
   );
 
 const SortableVirtualList = SortableContainer(
-  ({className, items, height, width, itemHeight, itemClass, isSorting}) => {
-    return (
-      <VirtualList
-        className={className}
-        itemSize={(index) => items[index].height}
-        estimatedItemSize={itemHeight}
-        renderItem={({index, style}) => {
-          const {value, height} = items[index];
-          return (
-            <Item
-              tabbable
-              key={value}
-              index={index}
-              className={itemClass}
-              value={value}
-              height={height}
-              style={style}
-              isSorting={isSorting}
-            />
-          );
-        }}
-        itemCount={items.length}
-        width={width}
-        height={height}
-      />
-    );
-  },
+  React.forwardRef(
+    (
+      {className, items, height, width, itemHeight, itemClass, isSorting},
+      ref,
+    ) => {
+      return (
+        <VirtualList
+          className={className}
+          itemSize={(index) => items[index].height}
+          estimatedItemSize={itemHeight}
+          renderItem={({index, style}) => {
+            const {value, height} = items[index];
+            return (
+              <Item
+                tabbable
+                key={value}
+                index={index}
+                className={itemClass}
+                value={value}
+                height={height}
+                style={style}
+                isSorting={isSorting}
+              />
+            );
+          }}
+          itemCount={items.length}
+          width={width}
+          height={height}
+        />
+      );
+    },
+  ),
 );
 
 // Function components cannot have refs, so we'll be using a class for React Virtualized
@@ -418,30 +438,32 @@ const SortableInfiniteList = SortableContainer(
 );
 
 const ShrinkingSortableList = SortableContainer(
-  ({className, isSorting, items, itemClass, shouldUseDragHandle}) => {
-    return (
-      <div className={className}>
-        {items.map(({value, height}, index) => (
-          <Item
-            tabbable
-            key={`item-${value}`}
-            className={itemClass}
-            index={index}
-            value={value}
-            height={isSorting ? 20 : height}
-            shouldUseDragHandle={shouldUseDragHandle}
-            isSorting={isSorting}
-          />
-        ))}
-      </div>
-    );
-  },
+  React.forwardRef(
+    ({className, isSorting, items, itemClass, shouldUseDragHandle}, ref) => {
+      return (
+        <div className={className}>
+          {items.map(({value, height}, index) => (
+            <Item
+              tabbable
+              key={`item-${value}`}
+              className={itemClass}
+              index={index}
+              value={value}
+              height={isSorting ? 20 : height}
+              shouldUseDragHandle={shouldUseDragHandle}
+              isSorting={isSorting}
+            />
+          ))}
+        </div>
+      );
+    },
+  ),
 );
 
 const NestedSortableList = SortableContainer(
-  ({className, items, isSorting}) => {
+  React.forwardRef(({className, items, isSorting}, ref) => {
     return (
-      <div className={className}>
+      <div className={className} ref={ref}>
         {items.map((value, index) => (
           <Category
             tabbable
@@ -452,7 +474,7 @@ const NestedSortableList = SortableContainer(
         ))}
       </div>
     );
-  },
+  }),
 );
 
 storiesOf('General | Layout / Vertical list', module)

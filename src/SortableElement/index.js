@@ -13,10 +13,7 @@ const propTypes = {
 
 const omittedProps = Object.keys(propTypes);
 
-export default function sortableElement(
-  WrappedComponent,
-  config = {withRef: false},
-) {
+export default function sortableElement(WrappedComponent) {
   return class WithSortableElement extends React.Component {
     static displayName = provideDisplayName(
       'sortableElement',
@@ -60,17 +57,14 @@ export default function sortableElement(
 
     register() {
       const {collection, disabled, index} = this.props;
-      const node = findDOMNode(this);
-
-      node.sortableInfo = {
+      this.node.sortableInfo = {
         collection,
         disabled,
         index,
         manager: this.context.manager,
       };
 
-      this.node = node;
-      this.ref = {node};
+      this.ref = {node: this.node};
 
       this.context.manager.add(collection, this.ref);
     }
@@ -79,18 +73,15 @@ export default function sortableElement(
       this.context.manager.remove(collection, this.ref);
     }
 
-    getWrappedInstance() {
-      invariant(
-        config.withRef,
-        'To access the wrapped instance, you need to pass in {withRef: true} as the second argument of the SortableElement() call',
-      );
-      return this.refs.wrappedInstance;
-    }
+    node = null;
 
     render() {
-      const ref = config.withRef ? 'wrappedInstance' : null;
-
-      return <WrappedComponent ref={ref} {...omit(this.props, omittedProps)} />;
+      return (
+        <WrappedComponent
+          ref={(ref) => (this.node = ref)}
+          {...omit(this.props, omittedProps)}
+        />
+      );
     }
   };
 }

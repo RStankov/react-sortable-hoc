@@ -6,7 +6,7 @@ import styles from './Item.scss';
 
 const ENTER_KEY = 13;
 
-function Item(props) {
+const Item = React.forwardRef((props, ref) => {
   const {
     dragging,
     sorting,
@@ -19,6 +19,7 @@ function Item(props) {
 
   return (
     <div
+      ref={ref}
       className={classNames(
         styles.Item,
         selected && !dragging && styles.selected,
@@ -37,7 +38,7 @@ function Item(props) {
       {shouldRenderItemCountBadge ? <Badge count={selectedItemsCount} /> : null}
     </div>
   );
-}
+});
 
 function Badge(props) {
   return <div className={styles.Badge}>{props.count}</div>;

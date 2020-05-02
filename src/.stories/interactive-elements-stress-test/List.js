@@ -3,7 +3,7 @@ import {sortableContainer} from '../../../src';
 
 import Item from './Item';
 
-function List({items}) {
+const List = React.forwardRef(({items}, ref) => {
   return (
     <div>
       {items.map(([key, children], index) => {
@@ -15,6 +15,6 @@ function List({items}) {
       })}
     </div>
   );
-}
+});
 
 export default sortableContainer(List);
